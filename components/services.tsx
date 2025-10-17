@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight, Smile, Zap, Shield, Sparkles } from "lucide-react"
 
 const services = [
@@ -51,6 +51,19 @@ const services = [
 
 export function Services() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [itemsPerPage, setItemsPerPage] = useState<number>(3)
+
+  useEffect(() => {
+    // compute items per page on the client only
+    const compute = () => {
+      const w = typeof window !== "undefined" ? window.innerWidth : 1024
+      setItemsPerPage(w < 768 ? 1 : w < 1024 ? 2 : 3)
+    }
+
+    compute()
+    window.addEventListener("resize", compute)
+    return () => window.removeEventListener("resize", compute)
+  }, [])
 
   const next = () => {
     setCurrentIndex((prev) => (prev + 1) % services.length)
@@ -61,7 +74,6 @@ export function Services() {
   }
 
   const getVisibleServices = () => {
-    const itemsPerPage = window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3
     const visible = []
     for (let i = 0; i < itemsPerPage; i++) {
       visible.push(services[(currentIndex + i) % services.length])
